@@ -29,6 +29,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
+        /* print & base */
         @media print { body * { visibility: hidden; } #laporanPreview, #laporanPreview * { visibility: visible; } #laporanPreview { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 1rem; box-sizing: border-box; } .no-print { display: none !important; } .laporan-table { width: 100%; border-collapse: collapse; font-size: 8pt; table-layout: fixed; margin-top: 1rem; } .laporan-table th, .laporan-table td { border: 1px solid #000; padding: 4px 4px; text-align: left; vertical-align: top; word-wrap: break-word; line-height: 1; } .laporan-table th { background-color: #e67e22 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } h2.laporan-judul { font-size: 12pt; font-weight: bold; text-align: center; margin-bottom: 1rem; visibility: visible; margin-top: 0; } @page { size: auto; margin: 2rem; } }
         body { background: linear-gradient(135deg, #f4f6f7 0%, #e5e8e8 100%); font-family: 'Inter', system-ui, sans-serif; color: #2c3e50; min-height: 100vh; }
         .card-ibukota { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); border-radius: 2rem; border: 1px solid rgba(41, 128, 185, 0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.08); transition: transform 0.2s; }
@@ -123,10 +124,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4" id="statsContainer"></div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="card-ibukota p-4 text-center bg-green-50 border-l-4 border-green-500"><div class="text-sm font-bold text-green-700 uppercase">✅ Total Luas Selesai (Sertipikat Terbit)</div><div class="text-3xl font-extrabold text-green-600" id="totalLuasSelesai">0 m²</div></div><div class="card-ibukota p-4 text-center bg-red-50 border-l-4 border-red-500"><div class="text-sm font-bold text-red-700 uppercase">⏳ Total Luas Belum Selesai (Proses + Belum Daftar)</div><div class="text-3xl font-extrabold text-red-600" id="totalLuasBelumSelesai">0 m²</div></div></div>
             <div class="grid md:grid-cols-2 gap-4"><div class="card-ibukota p-4"><h3 class="text-sm font-bold mb-2 text-ibukota-hijau flex items-center gap-2"><i class="fas fa-chart-simple"></i> Capaian Sertipikat</h3><div id="progresRingkasan" class="text-center text-2xl font-bold"></div><div class="w-full bg-gray-200 rounded-full h-2.5 mt-2"><div id="progresBar" class="bg-ibukota-hijau h-2.5 rounded-full" style="width:0%"></div></div><p class="text-xs text-gray-500 mt-1">dari total bidang tanah</p></div><div class="card-ibukota p-4"><h3 class="text-sm font-bold mb-2 text-ibukota-oranye flex items-center gap-2"><i class="fas fa-triangle-exclamation"></i> Peringatan Data</h3><div id="warningList" class="text-sm space-y-1 max-h-24 overflow-y-auto"></div></div></div>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="card-ibukota p-4"><h3 class="text-sm font-bold mb-2 text-ibukota-oranye text-center">📊 Perbandingan Status Sertipikat</h3><div class="chart-container"><canvas id="statusChart"></canvas></div></div>
-                <div class="card-ibukota p-4"><h3 class="text-sm font-bold mb-2 text-ibukota-hijau text-center">📐 Perbandingan Luas Tanah (m²)</h3><div class="chart-container"><canvas id="luasChart"></canvas></div></div>
-            </div>
+            <div class="grid md:grid-cols-2 gap-6"><div class="card-ibukota p-4"><h3 class="text-sm font-bold mb-2 text-ibukota-oranye text-center">📊 Perbandingan Status Sertipikat</h3><div class="chart-container"><canvas id="statusChart"></canvas></div></div><div class="card-ibukota p-4"><h3 class="text-sm font-bold mb-2 text-ibukota-hijau text-center">📐 Perbandingan Luas Tanah (m²)</h3><div class="chart-container"><canvas id="luasChart"></canvas></div></div></div>
             <div class="grid lg:grid-cols-2 gap-6"><div class="card-ibukota p-4"><h3 class="text-md font-bold text-ibukota-biru mb-3 flex items-center gap-2"><i class="fas fa-clock"></i> 5 Data Tanah Terbaru</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-ibukota-abu/20"><tr><th class="p-2 text-left">Pemegang Hak</th><th>Status</th><th>Tahun</th></tr></thead><tbody id="latestDataTable"></tbody></table></div></div><div class="card-ibukota p-4"><h3 class="text-md font-bold text-ibukota-hijau mb-3 flex items-center gap-2"><i class="fas fa-user-check"></i> Top 5 Pengambil Sertipikat</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-ibukota-abu/20"><tr><th class="p-2 text-left">Nama Pengambil</th><th>Jumlah</th></tr></thead><tbody id="topPengambilTable"></tbody></table></div></div></div>
         </div>
         
@@ -140,16 +138,16 @@
                     <div class="flex flex-wrap gap-3 items-center">
                         <select id="filterStatusRekap" class="p-2 rounded-xl border border-ibukota-biru bg-white"><option value="">Semua Status</option><option>SUDAH JADI</option><option>PROSES</option><option>BELUM DAFTAR</option></select>
                         <input id="filterTahun" type="number" placeholder="Tahun Daftar" class="p-2 rounded-xl border border-ibukota-biru w-32">
-                        <input id="filterUniversal" placeholder="Cari Nama / Hak Milik / NIB / Berkas / Catatan" class="p-2 rounded-xl bg-white/70 border border-ibukota-biru w-64">
+                        <input id="filterUniversal" placeholder="Cari Nama / Hak Milik / NIB / Luas / Berkas / Catatan / Pengambil" class="p-2 rounded-xl bg-white/70 border border-ibukota-biru w-80">
                     </div>
                     <button id="resetFilterBtn" class="bg-ibukota-oranye text-white px-4 py-2 rounded-xl text-sm shadow"><i class="fas fa-undo"></i> Reset Filter</button>
                 </div>
                 <div id="duplicateInfo" class="duplicate-badge mt-3"><i class="fas fa-clone"></i> <span>Memeriksa duplikat...</span></div>
             </div>
-            <div class="card-ibukota overflow-x-auto"><div class="rekap-scroll"><table class="w-full text-sm"><thead class="bg-ibukota-oranye"><tr><th class="p-2">No</th><th>Pemegang Hak</th><th>Hak Milik</th><th>NIB</th><th>Luas (m²)</th><th>Berkas</th><th>Tahun</th><th>Status</th><th>Pengambil</th><th>Catatan</th><th>Foto</th><th>Aksi</th></table></thead><tbody id="rekapBody"></tbody></table></div></div>
+            <div class="card-ibukota overflow-x-auto"><div class="rekap-scroll"><table class="w-full text-sm"><thead class="bg-ibukota-oranye"><tr><th class="p-2">No</th><th>Pemegang Hak</th><th>Hak Milik</th><th>NIB</th><th>Luas (m²)</th><th>Berkas</th><th>Tahun</th><th>Status</th><th>Pengambil</th><th>Catatan</th><th>Foto</th><th>Aksi</th></tr></thead><tbody id="rekapBody"></tbody></table></div></div>
         </div>
         
-        <!-- PETA dengan Import KML Lengkap -->
+        <!-- PETA dengan SIMPAN URL KML KE FIRESTORE (Opsi 1) -->
         <div id="peta" class="page-section hidden"><div class="card-ibukota p-3">
             <div class="flex flex-wrap lg:flex-nowrap justify-between gap-2 items-center mb-3">
                 <div class="map-legend"><span><i class="fas fa-circle" style="color:#27ae60;"></i> Terbit</span><span><i class="fas fa-circle" style="color:#f39c12;"></i> Proses</span><span><i class="fas fa-circle" style="color:#e74c3c;"></i> Belum</span><span><i class="fas fa-draw-polygon" style="color:#e74c3c;"></i> Batas Ibukota</span></div>
@@ -158,6 +156,8 @@
                 <button id="zoomToAllMarkers" class="bg-ibukota-biru text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-expand-alt"></i> Fokus Semua</button>
                 <button id="exportKMLBtn" class="bg-ibukota-hijau text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-download"></i> Ekspor KML</button>
                 <button id="importKMLBtn" class="bg-ibukota-oranye text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-upload"></i> Impor KML</button>
+                <button id="importKMLUrlBtn" class="bg-purple-600 text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-link"></i> Impor dari URL</button>
+                <button id="saveKMLUrlToFirestoreBtn" class="bg-blue-600 text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-save"></i> Simpan URL KML</button>
                 <input type="file" id="kmlFileInput" accept=".kml,.kmz" class="hidden">
             </div>
             <div class="flex flex-wrap gap-4 mb-3 items-center">
@@ -177,20 +177,36 @@
     <footer class="w-full text-center py-4 text-xs text-stone-500 border-t border-ibukota-oranye bg-white/30">SIAP-IBUKOTA © 2026 - Sistem Informasi Administrasi Pertanahan Lokasi Ibukota Kabupaten Bima - Pemerintah Kabupaten Bima</footer>
 </div>
 
+<!-- Modal untuk input URL KML -->
+<div id="urlModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden" onclick="if(event.target===this) closeUrlModal()">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 p-6">
+        <h3 class="text-xl font-bold mb-4 text-ibukota-oranye">Impor KML dari URL</h3>
+        <input type="url" id="kmlUrlInput" placeholder="https://.../file.kml" class="w-full p-3 border rounded-xl mb-4" autocomplete="off">
+        <div class="flex gap-3 justify-end">
+            <button id="urlModalCancelBtn" class="px-4 py-2 bg-gray-300 rounded-xl">Batal</button>
+            <button id="urlModalSubmitBtn" class="px-4 py-2 bg-ibukota-biru text-white rounded-xl">Impor</button>
+        </div>
+    </div>
+</div>
+
 <div id="cameraModal" class="camera-modal"><div class="camera-modal-content"><h3 class="text-lg font-bold mb-3">Ambil Foto Sertipikat</h3><video id="modalVideo" autoplay playsinline muted></video><canvas id="modalCanvas" class="hidden"></canvas><img id="modalPreview" class="modal-preview-img hidden"><div class="flex gap-2 justify-center mt-4"><button id="modalCaptureBtn" class="bg-ibukota-hijau text-white px-3 py-1 rounded-lg">Ambil</button><button id="modalRetakeBtn" class="hidden bg-yellow-200 px-3 py-1 rounded-lg">Ulang</button><button id="modalSaveBtn" class="hidden bg-blue-300 px-3 py-1 rounded-lg">Simpan</button><button id="modalCloseBtn" class="bg-gray-300 px-3 py-1 rounded-lg">Tutup</button></div></div></div>
 <div id="detailModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm hidden" onclick="if(event.target===this) closeDetailModal()"><div class="bg-white rounded-2xl max-w-2xl w-full mx-4"><div class="bg-gradient-to-r from-ibukota-oranye to-ibukota-kuning p-4 flex justify-between"><h3 class="text-xl font-bold text-white">Detail Tanah Ibukota</h3><button id="closeModalBtn" class="text-2xl text-white">&times;</button></div><div id="detailModalBody" class="p-5 max-h-[70vh] overflow-y-auto"></div></div></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, query, orderBy, onSnapshot, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, query, orderBy, onSnapshot, writeBatch, getDocs, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     
     const firebaseConfig = { apiKey: "AIzaSyDxeGYTWxy-aeLEmDsWUn4oEDf4-bO80_g", authDomain: "aplikasi-huntap.firebaseapp.com", databaseURL: "https://aplikasi-huntap-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "aplikasi-huntap", storageBucket: "aplikasi-huntap.firebasestorage.app", messagingSenderId: "913800740835", appId: "1:913800740835:web:bac4d117b63b4239a4aad6", measurementId: "G-0NZSF3MM56" };
     let app, db;
     try { app = initializeApp(firebaseConfig); db = getFirestore(app); window.db = db; console.log("Firebase ready"); } catch(e) { console.error(e); alert("Gagal koneksi Firebase: " + e.message); }
     
     const CLOUDINARY_CLOUD_NAME = "de4prnqa4", CLOUDINARY_UPLOAD_PRESET = "ibukota", CLOUDINARY_API_KEY = "522531551358338", CLOUDINARY_API_SECRET = "17j1h0HMoBTG8LUpX3k7gnjDuH0", DESA_TETAP = "Dadibou";
-    let tanahRef, logRef;
-    if (db) { tanahRef = collection(db, "data_tanah_ibukota"); logRef = collection(db, "log_aktivitas_ibukota"); }
+    let tanahRef, logRef, kmlConfigRef;
+    if (db) { 
+        tanahRef = collection(db, "data_tanah_ibukota"); 
+        logRef = collection(db, "log_aktivitas_ibukota");
+        kmlConfigRef = doc(db, "konfigurasi", "kml_online");
+    }
     
     async function logDetail(aksi, detail) { if(logRef) try{ await addDoc(logRef, { waktu: new Date().toISOString(), pengguna: currentUser, aksi, detail }); } catch(e){} }
     async function uploadToCloudinary(file) { const fd = new FormData(); fd.append("file", file); fd.append("upload_preset", CLOUDINARY_UPLOAD_PRESET); const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: "POST", body: fd }); if(!res.ok) throw new Error("Upload gagal"); const data = await res.json(); return data.secure_url; }
@@ -200,14 +216,15 @@
     let pendingImageFiles = [], existingPhotoUrls = [], deletedPhotoUrls = [];
     let showHoverInfo = true, showLabel = true;
     let statusChartInstance = null, luasChartInstance = null;
-    let kmlOverlayLayer = null; // Untuk layer hasil impor KML
+    let kmlOverlayLayer = null;
+    let currentKMLUrl = null;
     
-    // BATAS KAWASAN IBUKOTA (koordinat dari KML yang diberikan)
+    // Koordinat batas ibukota
     const batasIbukota = [
         [-8.561060108861328,118.668786742059], [-8.561307040226794,118.6673675759167], [-8.561710194228935,118.6673673001845], [-8.562157369327139,118.6673700924573], [-8.562896856861496,118.6673013806974], [-8.56349353633796,118.6672438652511], [-8.563534422048292,118.6673082864187], [-8.563756301690656,118.6673157339162], [-8.563835812182132,118.6678104955159], [-8.564104048909439,118.6678330888096], [-8.564173524893294,118.6680924150555], [-8.564548382323672,118.6680827405143], [-8.565119635750348,118.6680217149626], [-8.565212139274156,118.6677048901859], [-8.565563429209165,118.6677991260931], [-8.565638258663956,118.6678663808949], [-8.565684972105633,118.6679880400704], [-8.565746023197756,118.6682197885281], [-8.56577045708641,118.6684874023411], [-8.56592860604233,118.6686413456093], [-8.566123560741811,118.6689877038746], [-8.5661292015148,118.6689936167536], [-8.566447868597031,118.6691679043468], [-8.56646479096942,118.6691856430079], [-8.566470431760061,118.6691915559074], [-8.566773207217961,118.6692900186891], [-8.566801823466907,118.6692963485146], [-8.566813311175531,118.6692965569797], [-8.567249948493391,118.6692986701674], [-8.567563702165234,118.6692231388222], [-8.567807744940545,118.6693127344453], [-8.567931007966356,118.669485304919], [-8.568412074877186,118.6696643683825], [-8.568426106416222,118.669664623014], [-8.568727909910159,118.6696630026422], [-8.568803446572081,118.6697566374829], [-8.568748041255603,118.6701104939251], [-8.568902262019071,118.6701203900046], [-8.569071773316184,118.6700595911735], [-8.569117141219936,118.6698758861342], [-8.569306692644917,118.669872228872], [-8.569533715046788,118.6697344037885], [-8.56966147544534,118.6700490018773], [-8.569909294116751,118.6699257487137], [-8.570063515829482,118.669935644946], [-8.570033292611802,118.6703261318256], [-8.569505721625911,118.670540024219], [-8.569561110510177,118.6707374012386], [-8.569869695232786,118.6707160603408], [-8.569967286792487,118.6713722051086], [-8.56997548147007,118.6713952754108], [-8.570041804523632,118.6720346684641], [-8.56969901908076,118.6720561474272], [-8.569667291582091,118.6718020477566], [-8.569276511914957,118.6718537567893], [-8.569315095108131,118.6720906466198], [-8.569691696177429,118.672071982099], [-8.569759718866287,118.672935481059], [-8.564554037549396,118.6727664242485], [-8.564458995761186,118.6731100709738], [-8.563852366162481,118.6732615476595], [-8.563242189068603,118.6733008967902], [-8.563251606249802,118.6730825433266], [-8.563086532604585,118.6730179112807], [-8.562970115906774,118.6730214008781], [-8.562852306865169,118.6731033097319], [-8.562801485900547,118.673095273534], [-8.562676274431587,118.6730729432231], [-8.562505038965316,118.6730364062796], [-8.562339582264061,118.6730467725592], [-8.562081009816321,118.6730888753249], [-8.561890067575396,118.673045295751], [-8.561792715866911,118.672943246842], [-8.561684045040533,118.6727340263773], [-8.56045054476421,118.6726793279399], [-8.561060108861328,118.668786742059]
     ];
     
-    // ========== FUNGSI PARSING KML LENGKAP (Point, LineString, Polygon) ==========
+    // ========== FUNGSI PARSING KML ==========
     function parseKMLToLeaflet(xmlDoc) {
         const layerGroup = L.layerGroup();
         let stats = { points: 0, lines: 0, polygons: 0 };
@@ -234,7 +251,6 @@
             const description = descElem ? descElem.textContent : "";
             const popupContent = `<b>${escapeHtml(name)}</b>${description ? `<br><small>${escapeHtml(description)}</small>` : ''}`;
             
-            // Cek Point
             const point = pm.getElementsByTagName("Point")[0];
             if (point) {
                 const coordsElem = point.getElementsByTagName("coordinates")[0];
@@ -253,7 +269,6 @@
                 continue;
             }
             
-            // Cek LineString
             const lineString = pm.getElementsByTagName("LineString")[0];
             if (lineString) {
                 const coordsElem = lineString.getElementsByTagName("coordinates")[0];
@@ -268,7 +283,6 @@
                 continue;
             }
             
-            // Cek Polygon
             const polygon = pm.getElementsByTagName("Polygon")[0];
             if (polygon) {
                 const outerBoundary = polygon.getElementsByTagName("outerBoundaryIs")[0];
@@ -289,10 +303,8 @@
                 continue;
             }
             
-            // Cek MultiGeometry
             const multiGeom = pm.getElementsByTagName("MultiGeometry")[0];
             if (multiGeom) {
-                // Points dalam MultiGeometry
                 const pointsMulti = multiGeom.getElementsByTagName("Point");
                 for (let pt of pointsMulti) {
                     const coordsElem = pt.getElementsByTagName("coordinates")[0];
@@ -309,7 +321,6 @@
                         }
                     }
                 }
-                // Lines dalam MultiGeometry
                 const linesMulti = multiGeom.getElementsByTagName("LineString");
                 for (let ls of linesMulti) {
                     const coordsElem = ls.getElementsByTagName("coordinates")[0];
@@ -322,7 +333,6 @@
                         }
                     }
                 }
-                // Polygons dalam MultiGeometry
                 const polysMulti = multiGeom.getElementsByTagName("Polygon");
                 for (let pg of polysMulti) {
                     const outerBoundary = pg.getElementsByTagName("outerBoundaryIs")[0];
@@ -363,32 +373,100 @@
         });
     }
     
-    function importKMLFile(file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const xmlText = e.target.result;
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-            if (xmlDoc.getElementsByTagName("parsererror").length) {
-                Swal.fire("Error", "File KML tidak valid.", "error");
-                return;
-            }
-            if (kmlOverlayLayer) { map.removeLayer(kmlOverlayLayer); }
-            const { layerGroup, stats } = parseKMLToLeaflet(xmlDoc);
-            const totalFeatures = stats.points + stats.lines + stats.polygons;
-            if (totalFeatures === 0) {
-                Swal.fire("Peringatan", "Tidak ada fitur (titik, garis, poligon) yang dapat ditampilkan.", "warning");
-                return;
-            }
-            kmlOverlayLayer = layerGroup.addTo(map);
-            showKmlLegend(stats);
+    async function importKMLFromString(kmlString, showNotification = true) {
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(kmlString, "text/xml");
+        if (xmlDoc.getElementsByTagName("parsererror").length) {
+            throw new Error("File KML tidak valid");
+        }
+        if (kmlOverlayLayer) { map.removeLayer(kmlOverlayLayer); }
+        const { layerGroup, stats } = parseKMLToLeaflet(xmlDoc);
+        const totalFeatures = stats.points + stats.lines + stats.polygons;
+        if (totalFeatures === 0) {
+            throw new Error("Tidak ada fitur (titik, garis, poligon) yang dapat ditampilkan");
+        }
+        kmlOverlayLayer = layerGroup.addTo(map);
+        showKmlLegend(stats);
+        if (showNotification) {
             Swal.fire(`Sukses! ${totalFeatures} fitur KML berhasil diimpor.`, "", "success");
-            try { map.fitBounds(kmlOverlayLayer.getBounds()); } catch(e) { console.warn("Tidak bisa fit bounds"); }
-        };
-        reader.readAsText(file);
+        }
+        try { map.fitBounds(kmlOverlayLayer.getBounds()); } catch(e) { console.warn("Tidak bisa fit bounds"); }
+        return true;
     }
     
-    // Helper functions lainnya
+    async function importKMLFromUrl(url, showNotification = true) {
+        try {
+            if (showNotification) Swal.fire({ title: 'Mengunduh KML...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}: Gagal mengunduh file`);
+            const kmlString = await response.text();
+            currentKMLUrl = url;
+            await importKMLFromString(kmlString, showNotification);
+            if (showNotification) Swal.close();
+        } catch(err) {
+            if (showNotification) Swal.close();
+            throw err;
+        }
+    }
+    
+    async function importKMLFile(file, showNotification = true) {
+        const reader = new FileReader();
+        return new Promise((resolve, reject) => {
+            reader.onload = async function(e) {
+                try {
+                    currentKMLUrl = null;
+                    await importKMLFromString(e.target.result, showNotification);
+                    resolve(true);
+                } catch(err) {
+                    if (showNotification) Swal.fire("Error", err.message, "error");
+                    reject(err);
+                }
+            };
+            reader.onerror = () => reject(new Error("Gagal membaca file"));
+            reader.readAsText(file);
+        });
+    }
+    
+    // ========== SIMPAN URL KML KE FIRESTORE (OPSI 1 - HANYA URL) ==========
+    async function saveCurrentKMLUrlToFirestore() {
+        if (!currentKMLUrl) {
+            Swal.fire("Info", "Tidak ada URL KML yang aktif untuk disimpan. Silakan impor KML dari URL terlebih dahulu (bukan dari file).", "info");
+            return;
+        }
+        if (kmlConfigRef) {
+            const dataToSave = { 
+                url: currentKMLUrl, 
+                updatedAt: new Date().toISOString() 
+            };
+            await setDoc(kmlConfigRef, dataToSave);
+            Swal.fire("Berhasil", "URL KML telah disimpan ke Firestore.", "success");
+            await logDetail("SIMPAN_URL_KML", `Menyimpan URL KML: ${currentKMLUrl}`);
+        }
+    }
+    
+    // ========== LOAD KML DARI FIRESTORE ==========
+    async function loadKMLFromFirestore() {
+        if (!kmlConfigRef) return;
+        try {
+            const docSnap = await getDoc(kmlConfigRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.url && data.url.trim() !== "") {
+                    currentKMLUrl = data.url;
+                    try {
+                        await importKMLFromUrl(data.url, false);
+                        console.log("KML dari URL berhasil dimuat dari Firestore");
+                    } catch(e) {
+                        console.warn("Gagal memuat KML dari URL:", e);
+                    }
+                }
+            }
+        } catch(e) {
+            console.warn("Gagal memuat KML dari Firestore:", e);
+        }
+    }
+    
+    // Helper functions
     function refreshCompletePreview() { const container = document.getElementById('multiPreview'); container.innerHTML = ''; existingPhotoUrls.forEach((url, idx) => { const wrapper = document.createElement('div'); wrapper.className = "relative inline-block"; const img = document.createElement('img'); img.src = url; img.className = "photo-thumb"; const removeBtn = document.createElement('button'); removeBtn.innerHTML = "×"; removeBtn.className = "absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs"; removeBtn.onclick = () => { deletedPhotoUrls.push(url); existingPhotoUrls.splice(idx,1); refreshCompletePreview(); }; wrapper.appendChild(img); wrapper.appendChild(removeBtn); container.appendChild(wrapper); }); pendingImageFiles.forEach((file, idx) => { const url = URL.createObjectURL(file); const wrapper = document.createElement('div'); wrapper.className = "relative inline-block"; const img = document.createElement('img'); img.src = url; img.className = "photo-thumb"; const removeBtn = document.createElement('button'); removeBtn.innerHTML = "×"; removeBtn.onclick = () => { pendingImageFiles.splice(idx,1); URL.revokeObjectURL(url); refreshCompletePreview(); }; wrapper.appendChild(img); wrapper.appendChild(removeBtn); container.appendChild(wrapper); }); }
     function addPendingFile(file) { pendingImageFiles.push(file); refreshCompletePreview(); }
     async function uploadAllPending() { let urls=[]; for(let f of pendingImageFiles) urls.push(await uploadToCloudinary(f)); return urls; }
@@ -404,7 +482,59 @@
     function escapeXml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
     function attachAutoFilter() { const inpUniversal = document.getElementById("filterUniversal"); const inpYear = document.getElementById("filterTahun"); const statusSel = document.getElementById("filterStatusRekap"); if(inpUniversal) inpUniversal.addEventListener("input", () => renderRekapTable()); if(inpYear) inpYear.addEventListener("input", () => renderRekapTable()); if(statusSel) statusSel.addEventListener("change", () => renderRekapTable()); }
     function getDuplicateInfo(data) { let duplicateCount = { nama: 0, nib: 0, berkas: 0 }; const namaMap = new Map(), nibMap = new Map(), berkasMap = new Map(); data.forEach(item => { const nama = (item.namaPemegangHak || "").trim(); const nib = (item.nib || "").trim(); const berkas = (item.noBerkas || "").trim(); if (nama) namaMap.set(nama, (namaMap.get(nama) || 0) + 1); if (nib) nibMap.set(nib, (nibMap.get(nib) || 0) + 1); if (berkas) berkasMap.set(berkas, (berkasMap.get(berkas) || 0) + 1); }); duplicateCount.nama = Array.from(namaMap.values()).filter(v => v > 1).length; duplicateCount.nib = Array.from(nibMap.values()).filter(v => v > 1).length; duplicateCount.berkas = Array.from(berkasMap.values()).filter(v => v > 1).length; let parts = []; if (duplicateCount.nama) parts.push(`Nama (${duplicateCount.nama} duplikat)`); if (duplicateCount.nib) parts.push(`NIB (${duplicateCount.nib} duplikat)`); if (duplicateCount.berkas) parts.push(`Berkas (${duplicateCount.berkas} duplikat)`); if (parts.length === 0) return "✅ Tidak ada duplikat data"; return `⚠️ Duplikat: ${parts.join(", ")}`; }
-    function renderRekapTable() { let statusFilter = document.getElementById("filterStatusRekap")?.value || ""; let tahunFilter = document.getElementById("filterTahun")?.value || ""; let search = (document.getElementById("filterUniversal")?.value || "").toLowerCase(); let filtered = allData.filter(d => { if(statusFilter && d.status !== statusFilter) return false; if(tahunFilter && d.tahunDaftar?.toString() !== tahunFilter) return false; if(search) { let fields = [d.namaPemegangHak, d.hakMilikNomor, d.nib, d.noBerkas, d.catatan, d.yangMengambilSertipikat].filter(v=>v); if(!fields.some(f=>f.toString().toLowerCase().includes(search))) return false; } return true; }); filtered.sort((a,b) => (a.namaPemegangHak || "").localeCompare(b.namaPemegangHak || "", undefined, { sensitivity: 'base' })); let tbody = document.getElementById("rekapBody"); tbody.innerHTML = filtered.map((item, idx) => `<tr id="row-${item.id}" class="border-b hover:bg-amber-50"><td class="p-2">${idx+1}</td><td class="p-2">${escapeHtml(item.namaPemegangHak||'-')}</td><td class="p-2">${escapeHtml(item.hakMilikNomor||'-')}</td><td class="p-2">${escapeHtml(item.nib||'-')}</td><td class="p-2">${item.luasTanah || 0}</td><td class="p-2">${escapeHtml(item.noBerkas||'-')}</td><td class="p-2">${item.tahunDaftar||'-'}</td><td class="p-2"><span class="status-badge ${item.status==='SUDAH JADI'?'status-sudah':item.status==='PROSES'?'status-proses':'status-belum'}">${item.status}</span></td><td class="p-2">${escapeHtml(item.yangMengambilSertipikat||'-')}</td><td class="p-2">${escapeHtml(item.catatan||'-')}</td><td class="p-2">${item.fotoUrls?.length ? `<i class="fas fa-image text-blue-500"></i> ${item.fotoUrls.length}` : '-'}</td><td class="whitespace-nowrap"><button onclick="window.viewDetail('${item.id}')" class="text-blue-500"><i class="fas fa-eye"></i></button> <button onclick="window.editTanah('${item.id}')" class="text-amber-600"><i class="fas fa-edit"></i></button> <button onclick="window.focusMap('${item.id}')" class="text-green-600"><i class="fas fa-map-marker-alt"></i></button> <button onclick="window.hapusTanah('${item.id}')" class="text-red-500"><i class="fas fa-trash"></i></button></span></td></tr>`).join(""); const dupDiv = document.getElementById("duplicateInfo"); if(dupDiv) dupDiv.innerHTML = `<i class="fas fa-clone"></i> <span>${getDuplicateInfo(filtered)}</span>`; }
+    function renderRekapTable() { 
+        let statusFilter = document.getElementById("filterStatusRekap")?.value || ""; 
+        let tahunFilter = document.getElementById("filterTahun")?.value || ""; 
+        let search = (document.getElementById("filterUniversal")?.value || "").toLowerCase(); 
+        let filtered = allData.filter(d => { 
+            if(statusFilter && d.status !== statusFilter) return false; 
+            if(tahunFilter && d.tahunDaftar?.toString() !== tahunFilter) return false; 
+            if(search) { 
+                let searchableFields = [
+                    d.namaPemegangHak, 
+                    d.hakMilikNomor, 
+                    d.nib, 
+                    d.luasTanah?.toString(), 
+                    d.noBerkas, 
+                    d.tahunDaftar?.toString(),
+                    d.status,
+                    d.yangMengambilSertipikat, 
+                    d.catatan,
+                    d.desa
+                ].filter(v => v && v !== null && v !== undefined);
+                if(!searchableFields.some(f => f.toString().toLowerCase().includes(search))) return false;
+            } 
+            return true; 
+        }); 
+        filtered.sort((a,b) => (a.namaPemegangHak || "").localeCompare(b.namaPemegangHak || "", undefined, { sensitivity: 'base' })); 
+        let tbody = document.getElementById("rekapBody"); 
+        if (!tbody) return;
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="12" class="text-center p-4">Tidak ada数据</span></td></tr>';
+        } else {
+            tbody.innerHTML = filtered.map((item, idx) => `<tr id="row-${item.id}" class="border-b hover:bg-amber-50">
+                <td class="p-2">${idx+1}</td>
+                <td class="p-2">${escapeHtml(item.namaPemegangHak||'-')}</td>
+                <td class="p-2">${escapeHtml(item.hakMilikNomor||'-')}</td>
+                <td class="p-2">${escapeHtml(item.nib||'-')}</td>
+                <td class="p-2">${item.luasTanah || 0}</td>
+                <td class="p-2">${escapeHtml(item.noBerkas||'-')}</td>
+                <td class="p-2">${item.tahunDaftar||'-'}</td>
+                <td class="p-2"><span class="status-badge ${item.status==='SUDAH JADI'?'status-sudah':item.status==='PROSES'?'status-proses':'status-belum'}">${item.status}</span></td>
+                <td class="p-2">${escapeHtml(item.yangMengambilSertipikat||'-')}</td>
+                <td class="p-2">${escapeHtml(item.catatan||'-')}</td>
+                <td class="p-2">${item.fotoUrls?.length ? `<i class="fas fa-image text-blue-500"></i> ${item.fotoUrls.length}` : '-'}</td>
+                <td class="whitespace-nowrap">
+                    <button onclick="window.viewDetail('${item.id}')" class="text-blue-500"><i class="fas fa-eye"></i></button>
+                    <button onclick="window.editTanah('${item.id}')" class="text-amber-600"><i class="fas fa-edit"></i></button>
+                    <button onclick="window.focusMap('${item.id}')" class="text-green-600"><i class="fas fa-map-marker-alt"></i></button>
+                    <button onclick="window.hapusTanah('${item.id}')" class="text-red-500"><i class="fas fa-trash"></i></button>
+                </span>
+            </tr>`).join("");
+        }
+        const dupDiv = document.getElementById("duplicateInfo"); 
+        if(dupDiv) dupDiv.innerHTML = `<i class="fas fa-clone"></i> <span>${getDuplicateInfo(filtered)}</span>`; 
+    }
     function escapeHtml(str) { if(!str) return ""; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
     window.viewDetail = (id) => { let item=allData.find(d=>d.id==id); if(item){ let fotoHtml = item.fotoUrls?.length ? `<div class="col-span-2 flex gap-2">${item.fotoUrls.map(url=>`<img src="${url}" class="h-24 w-24 object-cover rounded-xl cursor-pointer" onclick="window.open('${url}')">`).join('')}</div>` : ''; document.getElementById("detailModalBody").innerHTML = `<div class="detail-grid"><div class="font-bold">Nama</div><div>${escapeHtml(item.namaPemegangHak)}</div><div class="font-bold">Hak Milik</div><div>${escapeHtml(item.hakMilikNomor||'-')}</div><div class="font-bold">NIB</div><div>${escapeHtml(item.nib||'-')}</div><div class="font-bold">Luas</div><div>${item.luasTanah} m²</div><div class="font-bold">Berkas</div><div>${escapeHtml(item.noBerkas||'-')}</div><div class="font-bold">Tahun</div><div>${item.tahunDaftar||'-'}</div><div class="font-bold">Status</div><div>${item.status}</div><div class="font-bold">Pengambil</div><div>${escapeHtml(item.yangMengambilSertipikat||'-')}</div><div class="font-bold">Catatan</div><div>${escapeHtml(item.catatan||'-')}</div>${fotoHtml}</div>`; document.getElementById("detailModal").classList.remove("hidden"); } };
     window.editTanah = (id) => { let item=allData.find(d=>d.id==id); if(item){ document.getElementById("editId").value=id; document.getElementById("nama").value=item.namaPemegangHak||""; document.getElementById("hakMilik").value=item.hakMilikNomor||""; document.getElementById("nib").value=item.nib||""; document.getElementById("luas").value=item.luasTanah||""; document.getElementById("noBerkas").value=item.noBerkas||""; document.getElementById("tahun").value=item.tahunDaftar||""; document.getElementById("statusTanah").value=item.status; document.getElementById("pengambil").value=item.yangMengambilSertipikat||""; document.getElementById("catatan").value=item.catatan||""; document.getElementById("latitude").value=item.latitude||""; document.getElementById("longitude").value=item.longitude||""; existingPhotoUrls=[...(item.fotoUrls||[])]; pendingImageFiles=[]; deletedPhotoUrls=[]; refreshCompletePreview(); document.getElementById("cancelFormBtn").classList.remove("hidden"); triggerNav("master"); } };
@@ -420,11 +550,11 @@
     document.getElementById("importExcelFile").onchange = async(e)=>{ if(e.target.files[0]) await importExcelData(e.target.files[0]); e.target.value=""; };
     document.getElementById("exportExcelBtn").onclick = () => { if (!allData.length) return Swal.fire("Peringatan", "Tidak ada data", "warning"); const sheetData = allData.map(d => ({ "Nama Pemegang Hak": d.namaPemegangHak || "", "Hak Milik No.": d.hakMilikNomor || "", "NIB": d.nib || "", "Luas (m²)": d.luasTanah || 0, "No Berkas": d.noBerkas || "", "Tahun Daftar": d.tahunDaftar || "", "Status": d.status || "", "Pengambil Sertipikat": d.yangMengambilSertipikat || "", "Catatan": d.catatan || "", "Latitude": d.latitude ?? "", "Longitude": d.longitude ?? "" })); const ws = XLSX.utils.json_to_sheet(sheetData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "DataIbukota"); XLSX.writeFile(wb, `Data_Ibukota_${Date.now()}.xlsx`); Swal.fire("Berhasil", "File Excel diunduh", "success"); };
     let currentFilteredData = [];
-    function renderLaporan(filterStatus) { let filtered = filterStatus ? allData.filter(d => d.status === filterStatus) : allData; filtered.sort((a,b) => (a.namaPemegangHak || "").localeCompare(b.namaPemegangHak || "", undefined, { sensitivity: 'base' })); currentFilteredData = filtered; if (filtered.length === 0) { document.getElementById("laporanPreview").innerHTML = '<p class="text-gray-500 text-center p-4">Tidak ada data.</p>'; return; } let html = '<h2 class="laporan-judul">DAFTAR REKAPAN SERTIPIKASI TANAH KAWASAN KANTOR IBUKOTA KABUPATEN BIMA</h2><table class="laporan-table"><thead><tr><th>No</th><th>Nama Pemegang Hak</th><th>Hak Milik</th><th>NIB</th><th>Luas (m²)</th><th>No Berkas</th><th>Tahun</th><th>Status</th><th>Pengambil</th><th>Catatan</th></tr></thead><tbody>'; filtered.forEach((item, idx) => { html += `<tr><td>${idx+1}</td><td>${escapeHtml(item.namaPemegangHak||'-')}</td><td>${escapeHtml(item.hakMilikNomor||'-')}</td><td>${escapeHtml(item.nib||'-')}</td><td>${item.luasTanah||0}</td><td>${escapeHtml(item.noBerkas||'-')}</td><td>${item.tahunDaftar||'-'}</td><td>${item.status||'-'}</td><td>${escapeHtml(item.yangMengambilSertipikat||'-')}</td><td>${escapeHtml(item.catatan||'-')}</td></tr>`; }); html += '</tbody></table>'; document.getElementById("laporanPreview").innerHTML = html; }
+    function renderLaporan(filterStatus) { let filtered = filterStatus ? allData.filter(d => d.status === filterStatus) : allData; filtered.sort((a,b) => (a.namaPemegangHak || "").localeCompare(b.namaPemegangHak || "", undefined, { sensitivity: 'base' })); currentFilteredData = filtered; if (filtered.length === 0) { document.getElementById("laporanPreview").innerHTML = '<p class="text-gray-500 text-center p-4">Tidak ada data.</p>'; return; } let html = '<h2 class="laporan-judul">DAFTAR REKAPAN SERTIPIKASI TANAH KAWASAN KANTOR IBUKOTA KABUPATEN BIMA</h2><table class="laporan-table"><thead><tr><th>No</th><th>Nama Pemegang Hak</th><th>Hak Milik</th><th>NIB</th><th>Luas (m²)</th><th>No Berkas</th><th>Tahun</th><th>Status</th><th>Pengambil</th><th>Catatan</th></tr></thead><tbody>'; filtered.forEach((item, idx) => { html += `<tr><td class="p-1 text-center">${idx+1}</td><td class="p-1">${escapeHtml(item.namaPemegangHak||'-')}</td><td class="p-1">${escapeHtml(item.hakMilikNomor||'-')}</td><td class="p-1">${escapeHtml(item.nib||'-')}</td><td class="p-1">${item.luasTanah||0}</td><td class="p-1">${escapeHtml(item.noBerkas||'-')}</td><td class="p-1">${item.tahunDaftar||'-'}</td><td class="p-1">${item.status||'-'}</td><td class="p-1">${escapeHtml(item.yangMengambilSertipikat||'-')}</td><td class="p-1">${escapeHtml(item.catatan||'-')}</td></tr>`; }); html += '</tbody></table>'; document.getElementById("laporanPreview").innerHTML = html; }
     document.getElementById("btnTampilkanLaporan").onclick = () => renderLaporan(document.getElementById("laporanStatusFilter").value);
     document.getElementById("btnCetakLaporan").onclick = () => { if (currentFilteredData.length === 0 && allData.length === 0) Swal.fire("Info","Tidak ada data","info"); else { if(currentFilteredData.length===0) renderLaporan(document.getElementById("laporanStatusFilter").value); window.print(); } };
     document.getElementById("btnExportLaporanExcel").onclick = () => { let dataToExport = currentFilteredData.length ? currentFilteredData : allData; const sheetData = dataToExport.map(d => ({ "Nama Pemegang Hak": d.namaPemegangHak||"", "Hak Milik No.": d.hakMilikNomor||"", "NIB": d.nib||"", "Luas (m²)": d.luasTanah||0, "No Berkas": d.noBerkas||"", "Tahun Daftar": d.tahunDaftar||"", "Status": d.status||"", "Pengambil Sertipikat": d.yangMengambilSertipikat||"", "Catatan": d.catatan||"", "Latitude": d.latitude??"", "Longitude": d.longitude??"" })); const ws = XLSX.utils.json_to_sheet(sheetData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "LaporanIbukota"); XLSX.writeFile(wb, `Laporan_Ibukota_${Date.now()}.xlsx`); Swal.fire("Berhasil","Laporan terunduh","success"); };
-    async function renderLog() { if (!logRef) return; let snap=await getDocs(query(logRef, orderBy("waktu","desc"))); let logs=snap.docs.map(d=>({ id:d.id, ...d.data() })); let from=document.getElementById("logDateFrom").value, to=document.getElementById("logDateTo").value, type=document.getElementById("logTypeFilter").value; if(from) logs=logs.filter(l=>l.waktu.split("T")[0]>=from); if(to) logs=logs.filter(l=>l.waktu.split("T")[0]<=to); if(type) logs=logs.filter(l=>l.aksi===type); let isAdmin = (currentUser === "Ianz"); document.getElementById("logAdminPanel").style.display = isAdmin ? "flex" : "none"; document.getElementById("logTable").innerHTML = logs.map(l => `<tr><td class="p-2 text-center">${isAdmin ? `<input type="checkbox" class="log-checkbox" value="${l.id}">` : ''}</td><td class="p-2">${new Date(l.waktu).toLocaleString()}</td><td class="p-2">${l.pengguna}</td><td class="p-2">${l.aksi}</td><td class="p-2">${l.detail}</td></tr>`).join(""); if(isAdmin) document.getElementById("selectAllLogs").onclick = (e) => document.querySelectorAll(".log-checkbox").forEach(cb => cb.checked = e.target.checked); }
+    async function renderLog() { if (!logRef) return; let snap=await getDocs(query(logRef, orderBy("waktu","desc"))); let logs=snap.docs.map(d=>({ id:d.id, ...d.data() })); let from=document.getElementById("logDateFrom").value, to=document.getElementById("logDateTo").value, type=document.getElementById("logTypeFilter").value; if(from) logs=logs.filter(l=>l.waktu.split("T")[0]>=from); if(to) logs=logs.filter(l=>l.waktu.split("T")[0]<=to); if(type) logs=logs.filter(l=>l.aksi===type); let isAdmin = (currentUser === "Ianz"); document.getElementById("logAdminPanel").style.display = isAdmin ? "flex" : "none"; document.getElementById("logTable").innerHTML = logs.map(l => `<td><td class="p-2 text-center">${isAdmin ? `<input type="checkbox" class="log-checkbox" value="${l.id}">` : ''}</td><td class="p-2">${new Date(l.waktu).toLocaleString()}</td><td class="p-2">${l.pengguna}</td><td class="p-2">${l.aksi}</td><td class="p-2">${l.detail}</td></tr>`).join(""); if(isAdmin) document.getElementById("selectAllLogs").onclick = (e) => document.querySelectorAll(".log-checkbox").forEach(cb => cb.checked = e.target.checked); }
     async function deleteSelectedLogs() { const cbs = document.querySelectorAll(".log-checkbox:checked"); if(cbs.length===0) return Swal.fire("Tidak ada log dipilih"); const confirm = await Swal.fire({ title: `Hapus ${cbs.length} log?`, icon: "warning", showCancelButton: true }); if(!confirm.isConfirmed) return; const batch = writeBatch(db); for(let cb of cbs) batch.delete(doc(logRef, cb.value)); await batch.commit(); Swal.fire("Berhasil"); renderLog(); }
     async function deleteAllLogs() { const snap = await getDocs(logRef); if(snap.empty) return Swal.fire("Tidak ada log"); const confirm = await Swal.fire({ title: "Hapus SEMUA log?", icon: "warning", showCancelButton: true }); if(!confirm.isConfirmed) return; const batch = writeBatch(db); snap.docs.forEach(d => batch.delete(d.ref)); await batch.commit(); Swal.fire("Berhasil"); renderLog(); }
     document.getElementById("deleteSelectedLogsBtn")?.addEventListener("click", deleteSelectedLogs); document.getElementById("deleteAllLogsBtn")?.addEventListener("click", deleteAllLogs);
@@ -452,6 +582,28 @@
     document.getElementById("closeModalBtn").onclick = () => document.getElementById("detailModal").classList.add("hidden");
     window.closeDetailModal = () => document.getElementById("detailModal").classList.add("hidden");
     
+    // Modal URL handling
+    const urlModal = document.getElementById('urlModal');
+    const kmlUrlInput = document.getElementById('kmlUrlInput');
+    function openUrlModal() { urlModal.classList.remove('hidden'); kmlUrlInput.value = ''; }
+    function closeUrlModal() { urlModal.classList.add('hidden'); }
+    document.getElementById("importKMLUrlBtn")?.addEventListener("click", openUrlModal);
+    document.getElementById("urlModalCancelBtn")?.addEventListener("click", closeUrlModal);
+    document.getElementById("urlModalSubmitBtn")?.addEventListener("click", async () => {
+        const url = kmlUrlInput.value.trim();
+        if (!url) {
+            Swal.fire("Perhatian", "Masukkan URL file KML terlebih dahulu", "warning");
+            return;
+        }
+        closeUrlModal();
+        try {
+            await importKMLFromUrl(url, true);
+        } catch(err) {
+            Swal.fire("Error", `Gagal mengimpor KML: ${err.message}`, "error");
+        }
+    });
+    document.getElementById("saveKMLUrlToFirestoreBtn")?.addEventListener("click", saveCurrentKMLUrlToFirestore);
+    
     const mapHeightSlider = document.getElementById("mapHeightSlider"), mapWidthSlider = document.getElementById("mapWidthSlider"), mapDiv = document.getElementById("map");
     if(mapHeightSlider) mapHeightSlider.addEventListener("input", (e) => { let val = e.target.value; if(mapDiv) mapDiv.style.height = val+"px"; document.getElementById("heightValue").innerText = val+"px"; if(map) map.invalidateSize(); });
     if(mapWidthSlider) mapWidthSlider.addEventListener("input", (e) => { let val = e.target.value; if(mapDiv) mapDiv.style.width = val+"%"; document.getElementById("widthValue").innerText = val+"%"; if(map) map.invalidateSize(); });
@@ -460,7 +612,7 @@
     document.getElementById("zoomToAllMarkers")?.addEventListener("click", fitMapToAllMarkers);
     document.getElementById("exportKMLBtn")?.addEventListener("click", exportToKML);
     document.getElementById("importKMLBtn")?.addEventListener("click", () => document.getElementById("kmlFileInput").click());
-    document.getElementById("kmlFileInput")?.addEventListener("change", (e) => { if(e.target.files[0]) importKMLFile(e.target.files[0]); e.target.value = ""; });
+    document.getElementById("kmlFileInput")?.addEventListener("change", (e) => { if(e.target.files[0]) importKMLFile(e.target.files[0], true); e.target.value = ""; });
     
     const loginOverlay = document.getElementById('loginOverlay'), appContainer = document.getElementById('appContent');
     async function doLogin(nama) { 
@@ -475,7 +627,8 @@
         triggerNav(savedPage && ["beranda","master","rekap","peta","laporan","log"].includes(savedPage) ? savedPage : "beranda"); 
         attachAutoFilter(); 
         await logDetail("LOGIN", `Pengguna ${nama} login`); 
-        fitMapToAllMarkers(); 
+        fitMapToAllMarkers();
+        await loadKMLFromFirestore();
     }
     document.getElementById("loginForm").addEventListener("submit", async (e) => { 
         e.preventDefault(); 
