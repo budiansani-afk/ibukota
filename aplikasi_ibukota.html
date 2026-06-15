@@ -29,7 +29,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
-        /* print & base */
         @media print { body * { visibility: hidden; } #laporanPreview, #laporanPreview * { visibility: visible; } #laporanPreview { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 1rem; box-sizing: border-box; } .no-print { display: none !important; } .laporan-table { width: 100%; border-collapse: collapse; font-size: 8pt; table-layout: fixed; margin-top: 1rem; } .laporan-table th, .laporan-table td { border: 1px solid #000; padding: 4px 4px; text-align: left; vertical-align: top; word-wrap: break-word; line-height: 1; } .laporan-table th { background-color: #e67e22 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } h2.laporan-judul { font-size: 12pt; font-weight: bold; text-align: center; margin-bottom: 1rem; visibility: visible; margin-top: 0; } @page { size: auto; margin: 2rem; } }
         body { background: linear-gradient(135deg, #f4f6f7 0%, #e5e8e8 100%); font-family: 'Inter', system-ui, sans-serif; color: #2c3e50; min-height: 100vh; }
         .card-ibukota { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); border-radius: 2rem; border: 1px solid rgba(41, 128, 185, 0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.08); transition: transform 0.2s; }
@@ -79,9 +78,9 @@
         .permanent-label-marker { background: transparent !important; border: none !important; pointer-events: none; white-space: nowrap; }
         .label-text { background: rgba(0, 0, 0, 0.7); color: white; font-size: 11px; font-weight: 500; padding: 2px 6px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); white-space: nowrap; font-family: 'Inter', sans-serif; }
         .duplicate-badge { background: #fef9e7; border-left: 4px solid #e67e22; padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600; color: #e67e22; display: inline-flex; align-items: center; gap: 0.5rem; }
-        .flex-nowrap-mobile { flex-wrap: wrap; } @media (min-width: 1024px) { .flex-nowrap-mobile { flex-wrap: nowrap; } }
         .page-section { display: block; }
         .page-section.hidden { display: none !important; }
+        .kml-legend { background: rgba(0,0,0,0.75); color: white; padding: 0.25rem 0.75rem; border-radius: 1.5rem; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 0.5rem; }
     </style>
 </head>
 <body>
@@ -119,50 +118,16 @@
     <main class="w-full px-4 md:px-6 py-6 max-w-[1600px] mx-auto pb-8 space-y-6">
         <div class="info-desa text-center md:text-left"><i class="fas fa-map-marker-alt mr-2 text-ibukota-oranye"></i> <strong>Lokasi:</strong> Desa Dadibou, Kecamatan Woha, Kabupaten Bima</div>
         
-        <!-- BERANDA dengan Chart Perbandingan Sertipikat & Luas -->
+        <!-- BERANDA -->
         <div id="beranda" class="page-section space-y-6">
-            <!-- Statistik Card -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4" id="statsContainer"></div>
-            <!-- Total Luas Selesai vs Belum -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="card-ibukota p-4 text-center bg-green-50 border-l-4 border-green-500">
-                    <div class="text-sm font-bold text-green-700 uppercase">✅ Total Luas Selesai (Sertipikat Terbit)</div>
-                    <div class="text-3xl font-extrabold text-green-600" id="totalLuasSelesai">0 m²</div>
-                </div>
-                <div class="card-ibukota p-4 text-center bg-red-50 border-l-4 border-red-500">
-                    <div class="text-sm font-bold text-red-700 uppercase">⏳ Total Luas Belum Selesai (Proses + Belum Daftar)</div>
-                    <div class="text-3xl font-extrabold text-red-600" id="totalLuasBelumSelesai">0 m²</div>
-                </div>
-            </div>
-            <!-- Capaian & Peringatan -->
-            <div class="grid md:grid-cols-2 gap-4">
-                <div class="card-ibukota p-4">
-                    <h3 class="text-sm font-bold mb-2 text-ibukota-hijau flex items-center gap-2"><i class="fas fa-chart-simple"></i> Capaian Sertipikat</h3>
-                    <div id="progresRingkasan" class="text-center text-2xl font-bold"></div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2"><div id="progresBar" class="bg-ibukota-hijau h-2.5 rounded-full" style="width:0%"></div></div>
-                    <p class="text-xs text-gray-500 mt-1">dari total bidang tanah</p>
-                </div>
-                <div class="card-ibukota p-4">
-                    <h3 class="text-sm font-bold mb-2 text-ibukota-oranye flex items-center gap-2"><i class="fas fa-triangle-exclamation"></i> Peringatan Data</h3>
-                    <div id="warningList" class="text-sm space-y-1 max-h-24 overflow-y-auto"></div>
-                </div>
-            </div>
-            <!-- DUA CHART: Perbandingan Sertipikat & Perbandingan Luas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div class="card-ibukota p-4 text-center bg-green-50 border-l-4 border-green-500"><div class="text-sm font-bold text-green-700 uppercase">✅ Total Luas Selesai (Sertipikat Terbit)</div><div class="text-3xl font-extrabold text-green-600" id="totalLuasSelesai">0 m²</div></div><div class="card-ibukota p-4 text-center bg-red-50 border-l-4 border-red-500"><div class="text-sm font-bold text-red-700 uppercase">⏳ Total Luas Belum Selesai (Proses + Belum Daftar)</div><div class="text-3xl font-extrabold text-red-600" id="totalLuasBelumSelesai">0 m²</div></div></div>
+            <div class="grid md:grid-cols-2 gap-4"><div class="card-ibukota p-4"><h3 class="text-sm font-bold mb-2 text-ibukota-hijau flex items-center gap-2"><i class="fas fa-chart-simple"></i> Capaian Sertipikat</h3><div id="progresRingkasan" class="text-center text-2xl font-bold"></div><div class="w-full bg-gray-200 rounded-full h-2.5 mt-2"><div id="progresBar" class="bg-ibukota-hijau h-2.5 rounded-full" style="width:0%"></div></div><p class="text-xs text-gray-500 mt-1">dari total bidang tanah</p></div><div class="card-ibukota p-4"><h3 class="text-sm font-bold mb-2 text-ibukota-oranye flex items-center gap-2"><i class="fas fa-triangle-exclamation"></i> Peringatan Data</h3><div id="warningList" class="text-sm space-y-1 max-h-24 overflow-y-auto"></div></div></div>
             <div class="grid md:grid-cols-2 gap-6">
-                <div class="card-ibukota p-4">
-                    <h3 class="text-sm font-bold mb-2 text-ibukota-oranye text-center">📊 Perbandingan Status Sertipikat</h3>
-                    <div class="chart-container"><canvas id="statusChart"></canvas></div>
-                </div>
-                <div class="card-ibukota p-4">
-                    <h3 class="text-sm font-bold mb-2 text-ibukota-hijau text-center">📐 Perbandingan Luas Tanah (m²)</h3>
-                    <div class="chart-container"><canvas id="luasChart"></canvas></div>
-                </div>
+                <div class="card-ibukota p-4"><h3 class="text-sm font-bold mb-2 text-ibukota-oranye text-center">📊 Perbandingan Status Sertipikat</h3><div class="chart-container"><canvas id="statusChart"></canvas></div></div>
+                <div class="card-ibukota p-4"><h3 class="text-sm font-bold mb-2 text-ibukota-hijau text-center">📐 Perbandingan Luas Tanah (m²)</h3><div class="chart-container"><canvas id="luasChart"></canvas></div></div>
             </div>
-            <!-- Tabel 5 data terbaru dan top pengambil -->
-            <div class="grid lg:grid-cols-2 gap-6">
-                <div class="card-ibukota p-4"><h3 class="text-md font-bold text-ibukota-biru mb-3 flex items-center gap-2"><i class="fas fa-clock"></i> 5 Data Tanah Terbaru</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-ibukota-abu/20"><tr><th class="p-2 text-left">Pemegang Hak</th><th>Status</th><th>Tahun</th></tr></thead><tbody id="latestDataTable"></tbody></table></div></div>
-                <div class="card-ibukota p-4"><h3 class="text-md font-bold text-ibukota-hijau mb-3 flex items-center gap-2"><i class="fas fa-user-check"></i> Top 5 Pengambil Sertipikat</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-ibukota-abu/20"><tr><th class="p-2 text-left">Nama Pengambil</th><th>Jumlah</th></tr></thead><tbody id="topPengambilTable"></tbody></table></div></div>
-            </div>
+            <div class="grid lg:grid-cols-2 gap-6"><div class="card-ibukota p-4"><h3 class="text-md font-bold text-ibukota-biru mb-3 flex items-center gap-2"><i class="fas fa-clock"></i> 5 Data Tanah Terbaru</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-ibukota-abu/20"><tr><th class="p-2 text-left">Pemegang Hak</th><th>Status</th><th>Tahun</th></tr></thead><tbody id="latestDataTable"></tbody></table></div></div><div class="card-ibukota p-4"><h3 class="text-md font-bold text-ibukota-hijau mb-3 flex items-center gap-2"><i class="fas fa-user-check"></i> Top 5 Pengambil Sertipikat</h3><div class="overflow-x-auto"><table class="w-full text-sm"><thead class="bg-ibukota-abu/20"><tr><th class="p-2 text-left">Nama Pengambil</th><th>Jumlah</th></tr></thead><tbody id="topPengambilTable"></tbody></table></div></div></div>
         </div>
         
         <!-- MASTER -->
@@ -181,11 +146,27 @@
                 </div>
                 <div id="duplicateInfo" class="duplicate-badge mt-3"><i class="fas fa-clone"></i> <span>Memeriksa duplikat...</span></div>
             </div>
-            <div class="card-ibukota overflow-x-auto"><div class="rekap-scroll"><table class="w-full text-sm"><thead class="bg-ibukota-oranye"><tr><th class="p-2">No</th><th>Pemegang Hak</th><th>Hak Milik</th><th>NIB</th><th>Luas (m²)</th><th>Berkas</th><th>Tahun</th><th>Status</th><th>Pengambil</th><th>Catatan</th><th>Foto</th><th>Aksi</th></tr></thead><tbody id="rekapBody"></tbody></table></div></div>
+            <div class="card-ibukota overflow-x-auto"><div class="rekap-scroll"><table class="w-full text-sm"><thead class="bg-ibukota-oranye"><tr><th class="p-2">No</th><th>Pemegang Hak</th><th>Hak Milik</th><th>NIB</th><th>Luas (m²)</th><th>Berkas</th><th>Tahun</th><th>Status</th><th>Pengambil</th><th>Catatan</th><th>Foto</th><th>Aksi</th></table></thead><tbody id="rekapBody"></tbody></table></div></div>
         </div>
         
-        <!-- PETA -->
-        <div id="peta" class="page-section hidden"><div class="card-ibukota p-3"><div class="flex flex-wrap lg:flex-nowrap justify-between gap-2 items-center mb-3"><div class="map-legend"><span><i class="fas fa-circle" style="color:#27ae60;"></i> Terbit</span><span><i class="fas fa-circle" style="color:#f39c12;"></i> Proses</span><span><i class="fas fa-circle" style="color:#e74c3c;"></i> Belum</span><span><i class="fas fa-draw-polygon" style="color:#e74c3c;"></i> Batas Ibukota</span></div><div class="map-control-group"><i class="fas fa-map-pin"></i> <label class="text-sm">Label Nama:</label> <input type="checkbox" id="toggleLabel" checked> <span id="labelStatus" class="text-xs">(Aktif)</span></div><div class="map-control-group"><i class="fas fa-info-circle"></i> <label class="text-sm">Hover:</label> <input type="checkbox" id="toggleHoverInfo" checked> <span id="hoverInfoStatus" class="text-xs">(Aktif)</span></div><button id="zoomToAllMarkers" class="bg-ibukota-biru text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-expand-alt"></i> Fokus Semua</button><button id="exportKMLBtn" class="bg-ibukota-hijau text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-download"></i> Ekspor KML</button><button id="importKMLBtn" class="bg-ibukota-oranye text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-upload"></i> Impor KML</button><input type="file" id="kmlFileInput" accept=".kml,.kmz" class="hidden"></div><div class="flex flex-wrap gap-4 mb-3 items-center"><div class="flex gap-2 items-center"><label class="text-sm font-bold">Tinggi Peta:</label> <input type="range" id="mapHeightSlider" min="300" max="1000" value="450" step="10" class="w-40"> <span id="heightValue" class="text-sm">450px</span></div><div class="flex gap-2 items-center"><label class="text-sm font-bold">Lebar Peta (%):</label> <input type="range" id="mapWidthSlider" min="60" max="100" value="100" step="5" class="w-40"> <span id="widthValue" class="text-sm">100%</span></div></div><div id="map" style="height:450px; width:100%; border-radius:1rem;"></div></div></div>
+        <!-- PETA dengan Import KML Lengkap -->
+        <div id="peta" class="page-section hidden"><div class="card-ibukota p-3">
+            <div class="flex flex-wrap lg:flex-nowrap justify-between gap-2 items-center mb-3">
+                <div class="map-legend"><span><i class="fas fa-circle" style="color:#27ae60;"></i> Terbit</span><span><i class="fas fa-circle" style="color:#f39c12;"></i> Proses</span><span><i class="fas fa-circle" style="color:#e74c3c;"></i> Belum</span><span><i class="fas fa-draw-polygon" style="color:#e74c3c;"></i> Batas Ibukota</span></div>
+                <div class="map-control-group"><i class="fas fa-map-pin"></i> <label class="text-sm">Label Nama:</label> <input type="checkbox" id="toggleLabel" checked> <span id="labelStatus" class="text-xs">(Aktif)</span></div>
+                <div class="map-control-group"><i class="fas fa-info-circle"></i> <label class="text-sm">Hover:</label> <input type="checkbox" id="toggleHoverInfo" checked> <span id="hoverInfoStatus" class="text-xs">(Aktif)</span></div>
+                <button id="zoomToAllMarkers" class="bg-ibukota-biru text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-expand-alt"></i> Fokus Semua</button>
+                <button id="exportKMLBtn" class="bg-ibukota-hijau text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-download"></i> Ekspor KML</button>
+                <button id="importKMLBtn" class="bg-ibukota-oranye text-white px-3 py-1 rounded-xl text-sm shadow"><i class="fas fa-upload"></i> Impor KML</button>
+                <input type="file" id="kmlFileInput" accept=".kml,.kmz" class="hidden">
+            </div>
+            <div class="flex flex-wrap gap-4 mb-3 items-center">
+                <div class="flex gap-2 items-center"><label class="text-sm font-bold">Tinggi Peta:</label> <input type="range" id="mapHeightSlider" min="300" max="1000" value="450" step="10" class="w-40"> <span id="heightValue" class="text-sm">450px</span></div>
+                <div class="flex gap-2 items-center"><label class="text-sm font-bold">Lebar Peta (%):</label> <input type="range" id="mapWidthSlider" min="60" max="100" value="100" step="5" class="w-40"> <span id="widthValue" class="text-sm">100%</span></div>
+            </div>
+            <div id="map" style="height:450px; width:100%; border-radius:1rem;"></div>
+            <div id="kmlLegend" class="mt-2 text-xs text-gray-500 hidden"></div>
+        </div></div>
         
         <!-- LAPORAN -->
         <div id="laporan" class="page-section hidden"><div class="card-ibukota p-4 space-y-4"><h2 class="text-xl font-bold text-ibukota-oranye">Laporan Pertanahan Ibukota</h2><div class="flex flex-wrap gap-3 items-end no-print"><div><label class="text-sm font-bold">Filter Status:</label><select id="laporanStatusFilter" class="p-2 rounded-xl border border-ibukota-biru"><option value="">Semua Status</option><option value="SUDAH JADI">SUDAH JADI (Sertipikat Terbit)</option><option value="PROSES">PROSES</option><option value="BELUM DAFTAR">BELUM DAFTAR</option></select></div><button id="btnTampilkanLaporan" class="bg-ibukota-biru text-white px-4 py-2 rounded-xl shadow"><i class="fas fa-eye"></i> Tampilkan Laporan</button><button id="btnCetakLaporan" class="bg-ibukota-oranye text-white px-4 py-2 rounded-xl shadow"><i class="fas fa-print"></i> Cetak / Export PDF</button><button id="btnExportLaporanExcel" class="bg-ibukota-hijau text-white px-4 py-2 rounded-xl shadow"><i class="fas fa-file-excel"></i> Ekspor Laporan Excel</button></div><div id="laporanPreview" class="overflow-x-auto border rounded-xl p-2 bg-white"><p class="text-gray-500 text-center p-4">Silakan pilih filter dan klik "Tampilkan Laporan".</p></div></div></div>
@@ -219,25 +200,200 @@
     let pendingImageFiles = [], existingPhotoUrls = [], deletedPhotoUrls = [];
     let showHoverInfo = true, showLabel = true;
     let statusChartInstance = null, luasChartInstance = null;
+    let kmlOverlayLayer = null; // Untuk layer hasil impor KML
     
-    // BATAS KAWASAN IBUKOTA (koordinat dari KML)
+    // BATAS KAWASAN IBUKOTA (koordinat dari KML yang diberikan)
     const batasIbukota = [
         [-8.561060108861328,118.668786742059], [-8.561307040226794,118.6673675759167], [-8.561710194228935,118.6673673001845], [-8.562157369327139,118.6673700924573], [-8.562896856861496,118.6673013806974], [-8.56349353633796,118.6672438652511], [-8.563534422048292,118.6673082864187], [-8.563756301690656,118.6673157339162], [-8.563835812182132,118.6678104955159], [-8.564104048909439,118.6678330888096], [-8.564173524893294,118.6680924150555], [-8.564548382323672,118.6680827405143], [-8.565119635750348,118.6680217149626], [-8.565212139274156,118.6677048901859], [-8.565563429209165,118.6677991260931], [-8.565638258663956,118.6678663808949], [-8.565684972105633,118.6679880400704], [-8.565746023197756,118.6682197885281], [-8.56577045708641,118.6684874023411], [-8.56592860604233,118.6686413456093], [-8.566123560741811,118.6689877038746], [-8.5661292015148,118.6689936167536], [-8.566447868597031,118.6691679043468], [-8.56646479096942,118.6691856430079], [-8.566470431760061,118.6691915559074], [-8.566773207217961,118.6692900186891], [-8.566801823466907,118.6692963485146], [-8.566813311175531,118.6692965569797], [-8.567249948493391,118.6692986701674], [-8.567563702165234,118.6692231388222], [-8.567807744940545,118.6693127344453], [-8.567931007966356,118.669485304919], [-8.568412074877186,118.6696643683825], [-8.568426106416222,118.669664623014], [-8.568727909910159,118.6696630026422], [-8.568803446572081,118.6697566374829], [-8.568748041255603,118.6701104939251], [-8.568902262019071,118.6701203900046], [-8.569071773316184,118.6700595911735], [-8.569117141219936,118.6698758861342], [-8.569306692644917,118.669872228872], [-8.569533715046788,118.6697344037885], [-8.56966147544534,118.6700490018773], [-8.569909294116751,118.6699257487137], [-8.570063515829482,118.669935644946], [-8.570033292611802,118.6703261318256], [-8.569505721625911,118.670540024219], [-8.569561110510177,118.6707374012386], [-8.569869695232786,118.6707160603408], [-8.569967286792487,118.6713722051086], [-8.56997548147007,118.6713952754108], [-8.570041804523632,118.6720346684641], [-8.56969901908076,118.6720561474272], [-8.569667291582091,118.6718020477566], [-8.569276511914957,118.6718537567893], [-8.569315095108131,118.6720906466198], [-8.569691696177429,118.672071982099], [-8.569759718866287,118.672935481059], [-8.564554037549396,118.6727664242485], [-8.564458995761186,118.6731100709738], [-8.563852366162481,118.6732615476595], [-8.563242189068603,118.6733008967902], [-8.563251606249802,118.6730825433266], [-8.563086532604585,118.6730179112807], [-8.562970115906774,118.6730214008781], [-8.562852306865169,118.6731033097319], [-8.562801485900547,118.673095273534], [-8.562676274431587,118.6730729432231], [-8.562505038965316,118.6730364062796], [-8.562339582264061,118.6730467725592], [-8.562081009816321,118.6730888753249], [-8.561890067575396,118.673045295751], [-8.561792715866911,118.672943246842], [-8.561684045040533,118.6727340263773], [-8.56045054476421,118.6726793279399], [-8.561060108861328,118.668786742059]
     ];
     
+    // ========== FUNGSI PARSING KML LENGKAP (Point, LineString, Polygon) ==========
+    function parseKMLToLeaflet(xmlDoc) {
+        const layerGroup = L.layerGroup();
+        let stats = { points: 0, lines: 0, polygons: 0 };
+        
+        function parseCoordinates(coordStr) {
+            const coords = [];
+            const pairs = coordStr.trim().split(/\s+/);
+            for (let pair of pairs) {
+                const parts = pair.split(',');
+                if (parts.length >= 2) {
+                    const lon = parseFloat(parts[0]);
+                    const lat = parseFloat(parts[1]);
+                    if (!isNaN(lat) && !isNaN(lon)) coords.push([lat, lon]);
+                }
+            }
+            return coords;
+        }
+        
+        const placemarks = xmlDoc.getElementsByTagName("Placemark");
+        for (let pm of placemarks) {
+            const nameElem = pm.getElementsByTagName("name")[0];
+            const name = nameElem ? nameElem.textContent : "Unnamed";
+            const descElem = pm.getElementsByTagName("description")[0];
+            const description = descElem ? descElem.textContent : "";
+            const popupContent = `<b>${escapeHtml(name)}</b>${description ? `<br><small>${escapeHtml(description)}</small>` : ''}`;
+            
+            // Cek Point
+            const point = pm.getElementsByTagName("Point")[0];
+            if (point) {
+                const coordsElem = point.getElementsByTagName("coordinates")[0];
+                if (coordsElem) {
+                    const parts = coordsElem.textContent.trim().split(',');
+                    if (parts.length >= 2) {
+                        const lon = parseFloat(parts[0]), lat = parseFloat(parts[1]);
+                        if (!isNaN(lat) && !isNaN(lon)) {
+                            const icon = L.divIcon({ html: `<div style="background:#00bcd4; width:12px; height:12px; border-radius:50%; border:1px solid white; box-shadow:0 1px 2px rgba(0,0,0,0.3);"></div>`, iconSize: [12,12] });
+                            const marker = L.marker([lat, lon], { icon }).bindPopup(popupContent);
+                            marker.addTo(layerGroup);
+                            stats.points++;
+                        }
+                    }
+                }
+                continue;
+            }
+            
+            // Cek LineString
+            const lineString = pm.getElementsByTagName("LineString")[0];
+            if (lineString) {
+                const coordsElem = lineString.getElementsByTagName("coordinates")[0];
+                if (coordsElem) {
+                    const coords = parseCoordinates(coordsElem.textContent);
+                    if (coords.length >= 2) {
+                        const polyline = L.polyline(coords, { color: "#ff9800", weight: 3 }).bindPopup(popupContent);
+                        polyline.addTo(layerGroup);
+                        stats.lines++;
+                    }
+                }
+                continue;
+            }
+            
+            // Cek Polygon
+            const polygon = pm.getElementsByTagName("Polygon")[0];
+            if (polygon) {
+                const outerBoundary = polygon.getElementsByTagName("outerBoundaryIs")[0];
+                if (outerBoundary) {
+                    const linearRing = outerBoundary.getElementsByTagName("LinearRing")[0];
+                    if (linearRing) {
+                        const coordsElem = linearRing.getElementsByTagName("coordinates")[0];
+                        if (coordsElem) {
+                            const coords = parseCoordinates(coordsElem.textContent);
+                            if (coords.length >= 3) {
+                                const poly = L.polygon(coords, { color: "#4caf50", weight: 2, fillOpacity: 0.3 }).bindPopup(popupContent);
+                                poly.addTo(layerGroup);
+                                stats.polygons++;
+                            }
+                        }
+                    }
+                }
+                continue;
+            }
+            
+            // Cek MultiGeometry
+            const multiGeom = pm.getElementsByTagName("MultiGeometry")[0];
+            if (multiGeom) {
+                // Points dalam MultiGeometry
+                const pointsMulti = multiGeom.getElementsByTagName("Point");
+                for (let pt of pointsMulti) {
+                    const coordsElem = pt.getElementsByTagName("coordinates")[0];
+                    if (coordsElem) {
+                        const parts = coordsElem.textContent.trim().split(',');
+                        if (parts.length >= 2) {
+                            const lon = parseFloat(parts[0]), lat = parseFloat(parts[1]);
+                            if (!isNaN(lat) && !isNaN(lon)) {
+                                const icon = L.divIcon({ html: `<div style="background:#00bcd4; width:12px; height:12px; border-radius:50%; border:1px solid white; box-shadow:0 1px 2px rgba(0,0,0,0.3);"></div>`, iconSize: [12,12] });
+                                const marker = L.marker([lat, lon], { icon }).bindPopup(popupContent);
+                                marker.addTo(layerGroup);
+                                stats.points++;
+                            }
+                        }
+                    }
+                }
+                // Lines dalam MultiGeometry
+                const linesMulti = multiGeom.getElementsByTagName("LineString");
+                for (let ls of linesMulti) {
+                    const coordsElem = ls.getElementsByTagName("coordinates")[0];
+                    if (coordsElem) {
+                        const coords = parseCoordinates(coordsElem.textContent);
+                        if (coords.length >= 2) {
+                            const polyline = L.polyline(coords, { color: "#ff9800", weight: 3 }).bindPopup(popupContent);
+                            polyline.addTo(layerGroup);
+                            stats.lines++;
+                        }
+                    }
+                }
+                // Polygons dalam MultiGeometry
+                const polysMulti = multiGeom.getElementsByTagName("Polygon");
+                for (let pg of polysMulti) {
+                    const outerBoundary = pg.getElementsByTagName("outerBoundaryIs")[0];
+                    if (outerBoundary) {
+                        const linearRing = outerBoundary.getElementsByTagName("LinearRing")[0];
+                        if (linearRing) {
+                            const coordsElem = linearRing.getElementsByTagName("coordinates")[0];
+                            if (coordsElem) {
+                                const coords = parseCoordinates(coordsElem.textContent);
+                                if (coords.length >= 3) {
+                                    const poly = L.polygon(coords, { color: "#4caf50", weight: 2, fillOpacity: 0.3 }).bindPopup(popupContent);
+                                    poly.addTo(layerGroup);
+                                    stats.polygons++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return { layerGroup, stats };
+    }
+    
+    function showKmlLegend(stats) {
+        const legendDiv = document.getElementById('kmlLegend');
+        if (!legendDiv) return;
+        let html = '<div class="flex flex-wrap gap-2 mt-1">';
+        if (stats.points > 0) html += `<span class="kml-legend"><i class="fas fa-map-marker-alt" style="color:#00bcd4;"></i> Titik KML (${stats.points})</span>`;
+        if (stats.lines > 0) html += `<span class="kml-legend"><i class="fas fa-draw-polygon" style="color:#ff9800;"></i> Garis/Polyline KML (${stats.lines})</span>`;
+        if (stats.polygons > 0) html += `<span class="kml-legend"><i class="fas fa-shapes" style="color:#4caf50;"></i> Poligon KML (${stats.polygons})</span>`;
+        html += `<button id="clearKmlLayerBtn" class="text-xs bg-red-500 hover:bg-red-600 text-white px-2 py-0.5 rounded ml-2">Hapus Layer KML</button>`;
+        html += '</div>';
+        legendDiv.innerHTML = html;
+        legendDiv.classList.remove('hidden');
+        document.getElementById('clearKmlLayerBtn')?.addEventListener('click', () => {
+            if (kmlOverlayLayer) { map.removeLayer(kmlOverlayLayer); kmlOverlayLayer = null; }
+            legendDiv.classList.add('hidden');
+        });
+    }
+    
+    function importKMLFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const xmlText = e.target.result;
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+            if (xmlDoc.getElementsByTagName("parsererror").length) {
+                Swal.fire("Error", "File KML tidak valid.", "error");
+                return;
+            }
+            if (kmlOverlayLayer) { map.removeLayer(kmlOverlayLayer); }
+            const { layerGroup, stats } = parseKMLToLeaflet(xmlDoc);
+            const totalFeatures = stats.points + stats.lines + stats.polygons;
+            if (totalFeatures === 0) {
+                Swal.fire("Peringatan", "Tidak ada fitur (titik, garis, poligon) yang dapat ditampilkan.", "warning");
+                return;
+            }
+            kmlOverlayLayer = layerGroup.addTo(map);
+            showKmlLegend(stats);
+            Swal.fire(`Sukses! ${totalFeatures} fitur KML berhasil diimpor.`, "", "success");
+            try { map.fitBounds(kmlOverlayLayer.getBounds()); } catch(e) { console.warn("Tidak bisa fit bounds"); }
+        };
+        reader.readAsText(file);
+    }
+    
+    // Helper functions lainnya
     function refreshCompletePreview() { const container = document.getElementById('multiPreview'); container.innerHTML = ''; existingPhotoUrls.forEach((url, idx) => { const wrapper = document.createElement('div'); wrapper.className = "relative inline-block"; const img = document.createElement('img'); img.src = url; img.className = "photo-thumb"; const removeBtn = document.createElement('button'); removeBtn.innerHTML = "×"; removeBtn.className = "absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs"; removeBtn.onclick = () => { deletedPhotoUrls.push(url); existingPhotoUrls.splice(idx,1); refreshCompletePreview(); }; wrapper.appendChild(img); wrapper.appendChild(removeBtn); container.appendChild(wrapper); }); pendingImageFiles.forEach((file, idx) => { const url = URL.createObjectURL(file); const wrapper = document.createElement('div'); wrapper.className = "relative inline-block"; const img = document.createElement('img'); img.src = url; img.className = "photo-thumb"; const removeBtn = document.createElement('button'); removeBtn.innerHTML = "×"; removeBtn.onclick = () => { pendingImageFiles.splice(idx,1); URL.revokeObjectURL(url); refreshCompletePreview(); }; wrapper.appendChild(img); wrapper.appendChild(removeBtn); container.appendChild(wrapper); }); }
     function addPendingFile(file) { pendingImageFiles.push(file); refreshCompletePreview(); }
     async function uploadAllPending() { let urls=[]; for(let f of pendingImageFiles) urls.push(await uploadToCloudinary(f)); return urls; }
     function normalizeData(docData) { return { ...docData, hakMilikNomor: docData.hakMilikNomor || docData.hakMilik || "", luasTanah: docData.luasTanah || 0, noBerkas: docData.noBerkas || docData.nomorBerkas || "", namaPemegangHak: docData.namaPemegangHak || "", nib: docData.nib || "", tahunDaftar: docData.tahunDaftar || "", status: docData.status || "BELUM DAFTAR", yangMengambilSertipikat: docData.yangMengambilSertipikat || "", catatan: docData.catatan || "", latitude: docData.latitude || null, longitude: docData.longitude || null, fotoUrls: docData.fotoUrls || [] }; }
-    function resetAllFilters() {
-        const filterStatus = document.getElementById("filterStatusRekap");
-        const filterTahun = document.getElementById("filterTahun");
-        const filterUniversal = document.getElementById("filterUniversal");
-        if (filterStatus) filterStatus.value = "";
-        if (filterTahun) filterTahun.value = "";
-        if (filterUniversal) filterUniversal.value = "";
-        if (typeof renderRekapTable === 'function') renderRekapTable();
-    }
+    function resetAllFilters() { const fs = document.getElementById("filterStatusRekap"); const ft = document.getElementById("filterTahun"); const fu = document.getElementById("filterUniversal"); if(fs) fs.value = ""; if(ft) ft.value = ""; if(fu) fu.value = ""; if(typeof renderRekapTable === 'function') renderRekapTable(); }
     function loadData() { if(!tanahRef) return; if(unsubscribeSnapshot) unsubscribeSnapshot(); unsubscribeSnapshot = onSnapshot(query(tanahRef, orderBy("createdAt","desc")), (snap) => { allData = snap.docs.map(d => ({ id:d.id, ...normalizeData(d.data()) })); renderAll(); renderLog(); setTimeout(resetAllFilters, 100); }, (err) => { Swal.fire("Error Database", err.message, "error"); }); }
     function renderAll() { renderBerandaStats(); renderRekapTable(); if(map) refreshMapMarkers(); }
     function gotoRekapById(id) { triggerNav("rekap"); setTimeout(() => { const row = document.getElementById(`row-${id}`); if(row) { row.scrollIntoView({ behavior: "smooth", block: "center" }); row.classList.add("highlight-row"); setTimeout(() => row.classList.remove("highlight-row"), 2000); } else { renderRekapTable(); setTimeout(()=>gotoRekapById(id), 300); } }, 200); }
@@ -273,7 +429,6 @@
     async function deleteAllLogs() { const snap = await getDocs(logRef); if(snap.empty) return Swal.fire("Tidak ada log"); const confirm = await Swal.fire({ title: "Hapus SEMUA log?", icon: "warning", showCancelButton: true }); if(!confirm.isConfirmed) return; const batch = writeBatch(db); snap.docs.forEach(d => batch.delete(d.ref)); await batch.commit(); Swal.fire("Berhasil"); renderLog(); }
     document.getElementById("deleteSelectedLogsBtn")?.addEventListener("click", deleteSelectedLogs); document.getElementById("deleteAllLogsBtn")?.addEventListener("click", deleteAllLogs);
     
-    // FUNGSI NAVIGASI UTAMA
     function triggerNav(page) {
         document.querySelectorAll(".page-section").forEach(s => s.classList.add("hidden"));
         const targetPage = document.getElementById(page);
@@ -292,12 +447,11 @@
         if (page === "rekap") setTimeout(resetAllFilters, 100);
     }
     
-    document.querySelectorAll(".nav-btn").forEach(btn => { btn.addEventListener("click", (e) => { const page = btn.dataset.page; if (page) triggerNav(page); }); });
+    document.querySelectorAll(".nav-btn").forEach(btn => { btn.addEventListener("click", () => { const page = btn.dataset.page; if (page) triggerNav(page); }); });
     document.getElementById("resetFilterBtn")?.addEventListener("click", resetAllFilters);
     document.getElementById("closeModalBtn").onclick = () => document.getElementById("detailModal").classList.add("hidden");
     window.closeDetailModal = () => document.getElementById("detailModal").classList.add("hidden");
     
-    // Map controls
     const mapHeightSlider = document.getElementById("mapHeightSlider"), mapWidthSlider = document.getElementById("mapWidthSlider"), mapDiv = document.getElementById("map");
     if(mapHeightSlider) mapHeightSlider.addEventListener("input", (e) => { let val = e.target.value; if(mapDiv) mapDiv.style.height = val+"px"; document.getElementById("heightValue").innerText = val+"px"; if(map) map.invalidateSize(); });
     if(mapWidthSlider) mapWidthSlider.addEventListener("input", (e) => { let val = e.target.value; if(mapDiv) mapDiv.style.width = val+"%"; document.getElementById("widthValue").innerText = val+"%"; if(map) map.invalidateSize(); });
@@ -306,9 +460,8 @@
     document.getElementById("zoomToAllMarkers")?.addEventListener("click", fitMapToAllMarkers);
     document.getElementById("exportKMLBtn")?.addEventListener("click", exportToKML);
     document.getElementById("importKMLBtn")?.addEventListener("click", () => document.getElementById("kmlFileInput").click());
-    document.getElementById("kmlFileInput")?.addEventListener("change", async (e) => { if(e.target.files[0]) { Swal.fire("Info", "Fitur impor KML sederhana. Gunakan koordinat bawaan untuk batas wilayah.", "info"); } e.target.value = ""; });
+    document.getElementById("kmlFileInput")?.addEventListener("change", (e) => { if(e.target.files[0]) importKMLFile(e.target.files[0]); e.target.value = ""; });
     
-    // LOGIN
     const loginOverlay = document.getElementById('loginOverlay'), appContainer = document.getElementById('appContent');
     async function doLogin(nama) { 
         currentUser = nama; 
@@ -360,7 +513,6 @@
         triggerNav("rekap"); 
     });
     
-    // CAMERA
     let modalStream=null, modalCapturedBlob=null;
     async function openCameraModal(){ if(modalStream) modalStream.getTracks().forEach(t=>t.stop()); try{ let stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{exact:"environment"}}}); modalStream=stream; document.getElementById("modalVideo").srcObject=stream; document.getElementById("cameraModal").classList.add("active"); }catch{ try{ let stream=await navigator.mediaDevices.getUserMedia({video:true}); modalStream=stream; document.getElementById("modalVideo").srcObject=stream; document.getElementById("cameraModal").classList.add("active"); }catch(e){ Swal.fire("Kamera tidak tersedia"); } } }
     document.getElementById("btnOpenCameraModal").onclick = openCameraModal;
@@ -370,7 +522,6 @@
     document.getElementById("modalCloseBtn").onclick = closeCameraModal;
     function closeCameraModal(){ document.getElementById("cameraModal").classList.remove("active"); if(modalStream) modalStream.getTracks().forEach(t=>t.stop()); modalStream=null; document.getElementById("modalVideo").classList.remove("hidden"); document.getElementById("modalPreview").classList.add("hidden"); document.getElementById("modalCaptureBtn").classList.remove("hidden"); document.getElementById("modalRetakeBtn").classList.add("hidden"); document.getElementById("modalSaveBtn").classList.add("hidden"); }
     
-    // RENDER BERANDA DENGAN DUA CHART
     function renderBerandaStats() { 
         let total = allData.length; 
         let sertifikatTerbit = allData.filter(d => d.status === "SUDAH JADI").length; 
@@ -398,64 +549,24 @@
         let counts={}; 
         allData.forEach(d=>{ if(d.yangMengambilSertipikat && d.yangMengambilSertipikat.trim()) counts[d.yangMengambilSertipikat.trim()] = (counts[d.yangMengambilSertipikat.trim()]||0)+1; }); 
         let top = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5); 
-        document.getElementById("topPengambilTable").innerHTML = top.map(([nama, jml])=>`<td><td class="p-2">${escapeHtml(nama)}</td><td class="font-semibold">${jml} sertipikat</td></tr>`).join('') || '<tr><td colspan="2">Belum ada data</td></tr>'; 
+        document.getElementById("topPengambilTable").innerHTML = top.map(([nama, jml])=>`<tr><td class="p-2">${escapeHtml(nama)}</td><td class="font-semibold">${jml} sertipikat</span></td></tr>`).join('') || '<tr><td colspan="2">Belum ada数据</span></td></tr>'; 
         
-        // Chart Status Sertipikat (Bar)
         if(statusChartInstance) statusChartInstance.destroy();
         const statusCtx = document.getElementById("statusChart")?.getContext("2d");
         if(statusCtx) {
             statusChartInstance = new Chart(statusCtx, {
                 type: 'bar',
-                data: {
-                    labels: ["Sertipikat Terbit", "Dalam Proses", "Belum Sertipikat"],
-                    datasets: [{
-                        label: 'Jumlah Bidang Tanah',
-                        data: [sertifikatTerbit, proses, belum],
-                        backgroundColor: ["#27ae60", "#f39c12", "#e74c3c"],
-                        borderRadius: 8,
-                        barPercentage: 0.6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, title: { display: true, text: 'Jumlah Bidang' } },
-                        x: { title: { display: true, text: 'Status Sertipikasi' } }
-                    },
-                    plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.raw} bidang` } } }
-                }
+                data: { labels: ["Sertipikat Terbit", "Dalam Proses", "Belum Sertipikat"], datasets: [{ label: 'Jumlah Bidang Tanah', data: [sertifikatTerbit, proses, belum], backgroundColor: ["#27ae60", "#f39c12", "#e74c3c"], borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, title: { display: true, text: 'Jumlah Bidang' } }, x: { title: { display: true, text: 'Status Sertipikasi' } } }, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.raw} bidang` } } } }
             });
         }
-        
-        // Chart Perbandingan Luas (Selesai vs Belum Selesai)
         if(luasChartInstance) luasChartInstance.destroy();
         const luasCtx = document.getElementById("luasChart")?.getContext("2d");
         if(luasCtx) {
             luasChartInstance = new Chart(luasCtx, {
                 type: 'bar',
-                data: {
-                    labels: ["Luas Selesai (Sertipikat Terbit)", "Luas Belum Selesai (Proses + Belum Daftar)"],
-                    datasets: [{
-                        label: 'Luas Tanah (m²)',
-                        data: [luasSudah, luasBelumSelesai],
-                        backgroundColor: ["#27ae60", "#e74c3c"],
-                        borderRadius: 8,
-                        barPercentage: 0.6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    scales: {
-                        y: { beginAtZero: true, ticks: { callback: (v) => v.toLocaleString() + ' m²' }, title: { display: true, text: 'Luas (m²)' } },
-                        x: { title: { display: true, text: 'Kategori' } }
-                    },
-                    plugins: {
-                        tooltip: { callbacks: { label: (ctx) => `${ctx.raw.toLocaleString()} m²` } },
-                        legend: { position: 'top' }
-                    }
-                }
+                data: { labels: ["Luas Selesai (Sertipikat Terbit)", "Luas Belum Selesai"], datasets: [{ label: 'Luas Tanah (m²)', data: [luasSudah, luasBelumSelesai], backgroundColor: ["#27ae60", "#e74c3c"], borderRadius: 8 }] },
+                options: { responsive: true, maintainAspectRatio: true, scales: { y: { beginAtZero: true, ticks: { callback: (v) => v.toLocaleString() + ' m²' }, title: { display: true, text: 'Luas (m²)' } }, x: { title: { display: true, text: 'Kategori' } } }, plugins: { tooltip: { callbacks: { label: (ctx) => `${ctx.raw.toLocaleString()} m²` } } } }
             });
         }
     }
